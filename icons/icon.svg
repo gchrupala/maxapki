@@ -7,15 +7,11 @@
        MnożenieMax (×) in front. Each symbol sits on the part of its card the
        next card leaves free. -->
   <defs>
+    <!-- Deep blue for MaxApki.top. The app at the old address, MaxApki, has
+         a rainbow here, so the two can be told apart on a home screen. -->
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#c2306d"/>
-      <stop offset="0.14" stop-color="#1d2766"/>
-      <stop offset="0.29" stop-color="#0d8a86"/>
-      <stop offset="0.43" stop-color="#e8710a"/>
-      <stop offset="0.57" stop-color="#c0392b"/>
-      <stop offset="0.71" stop-color="#7b3fc4"/>
-      <stop offset="0.86" stop-color="#2a4fc2"/>
-      <stop offset="1" stop-color="#12806c"/>
+      <stop offset="0" stop-color="#2a3a8f"/>
+      <stop offset="1" stop-color="#0f1640"/>
     </linearGradient>
   </defs>
   <rect width="512" height="512" fill="url(#bg)"/>
