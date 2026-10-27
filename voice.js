@@ -13,8 +13,16 @@
  *     index of the right answer, which gets the benefit of the doubt.
  *   sound(text, lang): the text as it sounds, roughly: lower case, without
  *     accents or punctuation, with spellings that sound alike written
- *     alike (Dutch ij and ei, the n of -en that is often not said; Spanish
- *     ll and y, b and v; French endings that are not heard; Polish ó and u).
+ *     alike (Dutch ij and ei, the n of -en and the r of -aar that are often
+ *     not said; Spanish ll and y, b and v; French endings that are not
+ *     heard; Polish ó and u).
+ *   around(options, context): for a sentence with a gap whose answers are
+ *     all short words of one syllable ("is", "naar"), the words of the
+ *     sentence to say with each answer, { before, after }: the words after
+ *     the gap up to a punctuation mark ("naar school"), or else those
+ *     before it ("ziek was"); two when the first is short ("is de wc").
+ *     null for other answers. Said alone, a short word is often not
+ *     recognized; with a word of its sentence it is.
  *
  * The answers are often forms of one word (tennis, tennist, tennissen), so
  * an answer heard word for word is picked however close the others are.
@@ -34,9 +42,12 @@
   'use strict';
 
   // An answer not heard word for word is picked when it scores at least
-  // MIN_SCORE (1 is the same text) and MARGIN more than any other.
+  // MIN_SCORE (1 is the same text) and MARGIN more than any other. A short
+  // right answer is one or two letters off at most: it is picked at
+  // MIN_SHORT ("es" for "is") when it is closer than any other.
   const MIN_SCORE = 0.6;
   const MARGIN = 0.2;
+  const MIN_SHORT = 0.5;
 
   // Lower case, without accents, apostrophes or punctuation.
   function normalize(text) {
@@ -70,6 +81,8 @@
       [/ij/g, 'ei'], [/y/g, 'ei'], [/au/g, 'ou'], [/ch/g, 'g'], [/ph/g, 'f'], [/th/g, 't'], [/c(?=[eiy])/g, 's'], [/c/g, 'k'],
       // A last d sounds as t; the n of -en is often not said (dansten, danste).
       [/dt$/, 't'], [/d$/, 't'], [/^(.{2,}[^aeiou])en$/, '$1e'],
+      // A last r after a long vowel is often not heard (naar, na).
+      [/([aeou])\1r$/, '$1'],
       [/([bdfgklmnprstvz])\1/g, '$1'],
     ],
     it: [
@@ -164,6 +177,7 @@
       return others.every((i) => (' ' + answers[longest] + ' ').includes(' ' + answers[i] + ' ')) ? longest : -1;
     }
     const [best, second] = scores.map((s, i) => i).sort((i, j) => scores[j] - scores[i]);
+    if (best === right && scores[best] >= MIN_SHORT && answers[best].length <= 4 && !(scores[second] >= scores[best])) return best;
     if (best === undefined || scores[best] < MIN_SCORE) return -1;
     // The right answer about as close as the closest one.
     if (right >= 0 && scores[right] >= MIN_SCORE && scores[best] - scores[right] < MARGIN) return right;
@@ -186,7 +200,43 @@
     return -1;
   }
 
-  const api = { normalize, sound, distance, likeness, pick, MIN_SCORE, MARGIN };
+  // The words of a sentence to say with the answers to its gap, when they
+  // are all words of one syllable, or of three letters at most.
+  const LETTER = /[\p{L}\p{N}’']/u;
+  const short = (option) => {
+    const w = normalize(option);
+    return !!w && !w.includes(' ') && (w.length <= 3 || (w.match(/[aeiouy]+/g) || []).length <= 1);
+  };
+  // The words from the gap on, up to a punctuation mark: the text after the
+  // gap, or the text before it read backwards.
+  function wordsFrom(text, backwards) {
+    const parts = text.split(/\s+/);
+    if (backwards) parts.reverse();
+    if (parts[0] !== '') return []; // the gap is part of a word
+    const out = [];
+    for (const part of parts.slice(1)) {
+      if (!part) break;
+      const chars = [...part];
+      const edge = backwards ? chars[chars.length - 1] : chars[0];
+      if (!LETTER.test(edge)) break;
+      const word = part.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}’']+$/gu, '');
+      out.push(word);
+      const end = backwards ? chars[0] : chars[chars.length - 1];
+      if (!LETTER.test(end) || word.length > 3 || out.length === 2) break;
+    }
+    return backwards ? out.reverse() : out;
+  }
+  function around(options, context) {
+    if (!context || context.length !== 2 || !options.length || !options.every(short)) return null;
+    const [before, after] = context;
+    const next = wordsFrom(' ' + after, false);
+    if (next.length) return { before: '', after: next.join(' ') };
+    const last = wordsFrom(before + ' ', true);
+    if (last.length) return { before: last.join(' '), after: '' };
+    return null;
+  }
+
+  const api = { normalize, sound, distance, likeness, pick, around, MIN_SCORE, MARGIN, MIN_SHORT };
 
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.VOICE = api;

@@ -126,3 +126,32 @@ test('a wrong answer heard word for word that sounds different stays wrong', () 
   assert.equal(VOICE.pick(['les'], ['le', 'la', 'les', 'du'], ['J’aime ', ' chocolat.'], { lang: 'fr', right: 0 }), 2);
   assert.equal(VOICE.pick(['amarillo'], ['amarilla', 'amarillo', 'amarillos', 'amarillas'], null, { lang: 'es', right: 0 }), 1);
 });
+
+test('short Dutch words, said alone or with a word of the sentence', () => {
+  const to = ['naar', 'in', 'op', 'bij'];
+  const school = ['Ik ga ', ' school.'];
+  assert.equal(VOICE.pick(['na'], to, school, { lang: 'nl', right: 0 }), 0);
+  assert.equal(VOICE.pick(['na school'], to, school, { lang: 'nl', right: 0 }), 0);
+  assert.equal(VOICE.pick(['ik ga na school'], to, school, { lang: 'nl', right: 0 }), 0);
+  assert.equal(VOICE.pick(['in school'], to, school, { lang: 'nl', right: 0 }), 1);
+  assert.equal(VOICE.pick(['un school'], to, school, { lang: 'nl', right: 0 }), -1);
+  const be = ['is', 'zijn', 'ben', 'bent'];
+  const cat = ['De kat ', ' zwart.'];
+  assert.equal(VOICE.pick(['es'], be, cat, { lang: 'nl', right: 0 }), 0);
+  assert.equal(VOICE.pick(['es zwart'], be, cat, { lang: 'nl', right: 0 }), 0);
+  assert.equal(VOICE.pick(['zijn zwart'], be, cat, { lang: 'nl', right: 0 }), 1);
+  // A short wrong answer still has to be clearly closer.
+  assert.equal(VOICE.pick(['es'], be, cat, { lang: 'nl', right: 2 }), -1);
+});
+
+test('the words to say with short answers to a gap', () => {
+  const be = ['is', 'zijn', 'ben', 'bent'];
+  assert.deepEqual(VOICE.around(['naar', 'in', 'op', 'bij'], ['Ik ga ', ' school.']), { before: '', after: 'school' });
+  assert.deepEqual(VOICE.around(be, ['Waar ', ' de wc?']), { before: '', after: 'de wc' });
+  assert.deepEqual(VOICE.around(be, ['Hoe oud ', ' jij?']), { before: '', after: 'jij' });
+  assert.deepEqual(VOICE.around(['was', 'is', 'zal', 'ben'], ['Hoewel hij ziek ', ', kwam hij toch.']), { before: 'ziek', after: '' });
+  assert.deepEqual(VOICE.around(['was', 'is', 'had', 'wordt'], ['Toen ik aankwam, ', ' de trein al vertrokken.']), { before: '', after: 'de trein' });
+  assert.deepEqual(VOICE.around(['à', 'au', 'en', 'de'], ['Je vais ', ' l’école.']), { before: '', after: 'l’école' });
+  assert.equal(VOICE.around(['allons', 'allez', 'va', 'vont'], ['Nous ', ' à la piscine.']), null);
+  assert.equal(VOICE.around(be, null), null);
+});

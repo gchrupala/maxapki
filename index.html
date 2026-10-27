@@ -956,6 +956,8 @@
   .choice.is-right { background: var(--good); border-color: var(--good); color: var(--pen-ink); box-shadow: 0 3px 0 color-mix(in srgb, var(--good) 55%, #000); }
   .choice.is-wrong { border-color: var(--bad); color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, var(--key)); }
   .choices.answered .choice:not(.is-right):not(.is-wrong) { opacity: 0.45; }
+  .gap-context { font-weight: 400; opacity: 0.6; }
+  .choices:not(.spoken) .gap-context { display: none; }
 
   .primary-btn {
     border: none;
@@ -3274,7 +3276,7 @@
     const was = mode;
     const buttons = [...$('choices').querySelectorAll('.choice')];
     const card = BY_LANG[currentId];
-    const i = VOICE.pick(heard, buttons.map((b) => b.textContent), card.kind === 'g' ? card.show.split('___') : null,
+    const i = VOICE.pick(heard, options.map((k) => langOffered[k] || ''), card.kind === 'g' ? card.show.split('___') : null,
       { lang: card.lang, right: options.indexOf(currentId) });
     if (i < 0) {
       voiceHeard = heard[0] || '';
@@ -3308,6 +3310,7 @@
     const mic = $('mic');
     const t = T();
     mic.hidden = !on;
+    $('choices').classList.toggle('spoken', on && !!state.settings.voice);
     mic.classList.toggle('on', !!recognizer);
     mic.classList.toggle('big', !!ownCard());
     mic.textContent = '🎤 ' + (recognizer ? t.voiceListening : t.voiceSay);
@@ -3532,10 +3535,19 @@
       $('choices').classList.toggle('long', long);
       // Once answered, the right answer turns green and a wrong pick is marked.
       $('choices').classList.toggle('answered', mode !== 'ask');
+      // JęzykiMax: a gap whose answers are short words shows the words of
+      // the sentence to say with them, while answering by voice (voice.js).
+      const near = !!word && word.kind === 'g' && VOICE.around(options.map((k) => langOffered[k] || ''), word.show.split('___'));
       $('choices').querySelectorAll('.choice').forEach((btn, i) => {
         const id = options[i];
         btn.hidden = !id; // JęzykiMax: an article card has two answers
         btn.innerHTML = id ? choice().answer(id) : '';
+        if (id && near) {
+          const target = btn.querySelector('.target');
+          const span = (t) => '<span class="gap-context">' + esc(t) + '</span>';
+          if (near.before) target.insertAdjacentHTML('afterbegin', span(near.before + ' '));
+          if (near.after) target.insertAdjacentHTML('beforeend', span((langOffered[id].endsWith('’') ? '' : ' ') + near.after));
+        }
         btn.classList.toggle('is-right', mode !== 'ask' && id === c.id);
         btn.classList.toggle('is-wrong', mode === 'wrong' && id === picked);
       });
