@@ -3535,7 +3535,7 @@
       $('choices').classList.toggle('long', long);
       // Once answered, the right answer turns green and a wrong pick is marked.
       $('choices').classList.toggle('answered', mode !== 'ask');
-      // JęzykiMax: a gap whose answers are short words shows the words of
+      // JęzykiMax: a gap with a short word as an answer shows the words of
       // the sentence to say with them, while answering by voice (voice.js).
       const near = !!word && word.kind === 'g' && VOICE.around(options.map((k) => langOffered[k] || ''), word.show.split('___'));
       $('choices').querySelectorAll('.choice').forEach((btn, i) => {

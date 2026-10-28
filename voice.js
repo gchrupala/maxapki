@@ -16,8 +16,8 @@
  *     alike (Dutch ij and ei, the n of -en and the r of -aar that are often
  *     not said; Spanish ll and y, b and v; French endings that are not
  *     heard; Polish ó and u).
- *   around(options, context): for a sentence with a gap whose answers are
- *     all short words of one syllable ("is", "naar"), the words of the
+ *   around(options, context): for a sentence with a gap with an answer
+ *     that is a short word of one syllable ("is", "naar"), the words of the
  *     sentence to say with each answer, { before, after }: the words after
  *     the gap up to a punctuation mark ("naar school"), or else those
  *     before it ("ziek was"); two when the first is short ("is de wc").
@@ -200,8 +200,8 @@
     return -1;
   }
 
-  // The words of a sentence to say with the answers to its gap, when they
-  // are all words of one syllable, or of three letters at most.
+  // The words of a sentence to say with the answers to its gap, when one
+  // of them is a word of one syllable, or of three letters at most.
   const LETTER = /[\p{L}\p{N}’']/u;
   const short = (option) => {
     const w = normalize(option);
@@ -227,7 +227,7 @@
     return backwards ? out.reverse() : out;
   }
   function around(options, context) {
-    if (!context || context.length !== 2 || !options.length || !options.every(short)) return null;
+    if (!context || context.length !== 2 || !options.length || !options.some(short)) return null;
     const [before, after] = context;
     const next = wordsFrom(' ' + after, false);
     if (next.length) return { before: '', after: next.join(' ') };

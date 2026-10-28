@@ -152,6 +152,7 @@ test('the words to say with short answers to a gap', () => {
   assert.deepEqual(VOICE.around(['was', 'is', 'zal', 'ben'], ['Hoewel hij ziek ', ', kwam hij toch.']), { before: 'ziek', after: '' });
   assert.deepEqual(VOICE.around(['was', 'is', 'had', 'wordt'], ['Toen ik aankwam, ', ' de trein al vertrokken.']), { before: '', after: 'de trein' });
   assert.deepEqual(VOICE.around(['à', 'au', 'en', 'de'], ['Je vais ', ' l’école.']), { before: '', after: 'l’école' });
-  assert.equal(VOICE.around(['allons', 'allez', 'va', 'vont'], ['Nous ', ' à la piscine.']), null);
+  assert.deepEqual(VOICE.around(['moe', 'uitgerust', 'wakker', 'fit'], ['Ik ben ', ', dus ik ga vroeg naar bed.']), { before: 'Ik ben', after: '' });
+  assert.equal(VOICE.around(['allons', 'allez', 'avons'], ['Nous ', ' à la piscine.']), null);
   assert.equal(VOICE.around(be, null), null);
 });
