@@ -158,6 +158,10 @@
     flex-direction: column;
     gap: 1.5rem;
   }
+  @media (max-width: 560px) {
+    .app { gap: 1rem; padding-top: calc(0.75rem + env(safe-area-inset-top, 0px)); }
+    .app .study { gap: 1rem; }
+  }
 
   button { font: inherit; color: inherit; }
   button:focus-visible, input:focus-visible { outline: 3px solid var(--pen); outline-offset: 2px; }
@@ -515,6 +519,21 @@
   .settings-btn svg { width: 1.15rem; height: 1.15rem; flex: none; }
   .icon-btn { display: inline-grid; place-items: center; width: 2.35rem; height: 2.35rem; padding: 0; }
   .icon-btn svg { width: 1.15rem; height: 1.15rem; }
+  /* On a phone the header takes two rows: the app name with the buttons as
+     icons, then the counts and coins. The names of the buttons stay for
+     screen readers. */
+  @media (max-width: 560px) {
+    .top { gap: 0.3rem 0.4rem; }
+    .top::after { content: ""; order: 2; flex-basis: 100%; }
+    .brand { font-size: 1.25rem; gap: 0.35rem; padding-inline-end: 0.5rem; }
+    .brand-title { margin-inline-end: auto; }
+    .top .settings-btn, .top .icon-btn { justify-content: center; width: 2.2rem; height: 2.2rem; padding: 0; }
+    .top .settings-btn { order: 1; }
+    .counts { flex: 1 1 0; min-width: 0; gap: 0.1rem 0.6rem; font-size: 0.8rem; }
+    .count b { font-size: 1.05rem; }
+    .top .settings-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .counts, .coins, .trophies, #clock-pill, .top .icon-btn { order: 3; }
+  }
   /* A short message at the bottom of the screen, e.g. "Link copied" */
   .toast {
     position: fixed;
@@ -570,6 +589,11 @@
      grows taller when its text needs it, e.g. a right answer with coins on a
      phone; "aspect-ratio" on the card itself cut off the last line there. */
   .card::before { content: ""; grid-area: 1 / 1 / 3 / 2; aspect-ratio: 5 / 3; }
+  /* JęzykiMax on a phone: the card only as tall as it needs, so the answers
+     fit on the screen under it. */
+  @media (max-width: 560px) {
+    body[data-app="languages"] .card::before { aspect-ratio: auto; }
+  }
   .card > .card-head { grid-area: 1 / 1; }
   .card > .card-body { grid-area: 2 / 1; }
   /* The text on the right and the Back button go under the tag when the
@@ -745,6 +769,12 @@
     .targets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.4rem; }
     .targets button { grid-column: span 2; padding: 0.3rem 0.55rem; }
     .targets button:last-child:nth-child(odd) { grid-column: 2 / span 2; }
+    /* Folded, to leave room for the card and its answers: only the language
+       learned shows, with an arrow; tapping it shows the others. */
+    .targets:not(.open) { display: flex; }
+    .targets:not(.open) button[aria-pressed="false"] { display: none; }
+    .targets button[aria-pressed="true"]::after { content: " ▾"; font-size: 0.8em; }
+    .targets.open button[aria-pressed="true"]::after { content: " ▴"; }
   }
   .target { direction: ltr; unicode-bidi: isolate; }
   .target.sentence { font-size: clamp(1.2rem, 5.4cqi, 2rem); line-height: 1.3; }
@@ -3316,7 +3346,33 @@
     mic.textContent = '🎤 ' + (recognizer ? t.voiceListening : t.voiceSay);
     const heard = ownCard() ? t.heardOther : t.heardNote;
     $('heard').textContent = !on ? '' : voiceError ? t[voiceError] : voiceHeard ? heard(voiceHeard) : '';
+    keepAwake();
   }
+
+  // While answering by voice, nothing touches the screen, so the phone would
+  // dim and lock it. The screen stays on while there are cards to answer
+  // with listening switched on. The browser lets go of it when the page is
+  // hidden; it is asked again when the page shows. Without the API (older
+  // Safari), the screen dims as before.
+  let wakeLock = null; // the lock, or a promise of it while asked for
+  function keepAwake() {
+    if (!navigator.wakeLock) return;
+    const want = app.id === 'languages' && !!state.settings.voice && mode !== 'done' && !!current()
+      && document.visibilityState === 'visible';
+    if (want && !wakeLock) {
+      const asked = navigator.wakeLock.request('screen').then((lock) => {
+        if (wakeLock !== asked) return lock.release();
+        wakeLock = lock;
+        lock.addEventListener('release', () => { if (wakeLock === lock) wakeLock = null; });
+      }, () => { if (wakeLock === asked) wakeLock = null; });
+      wakeLock = asked;
+    } else if (!want && wakeLock) {
+      const lock = wakeLock;
+      wakeLock = null;
+      if (lock.release) lock.release();
+    }
+  }
+  document.addEventListener('visibilitychange', keepAwake);
 
   // ---------- rendering ----------
 
@@ -3618,6 +3674,7 @@
     const ahead = Math.round(state.clockOffset / DAY);
     pill.hidden = ahead === 0;
     pill.textContent = t.testClock(ahead);
+    keepAwake();
   }
 
   function renderDone() {
@@ -3776,8 +3833,12 @@
 
   // JęzykiMax: the buttons for the language to learn.
   function renderTargets() {
+    const open = $('targets').classList.contains('open');
     document.querySelectorAll('#targets [data-target]').forEach((b) => {
-      b.setAttribute('aria-pressed', String(b.dataset.target === state.settings.target));
+      const on = b.dataset.target === state.settings.target;
+      b.setAttribute('aria-pressed', String(on));
+      if (on) b.setAttribute('aria-expanded', String(open));
+      else b.removeAttribute('aria-expanded');
     });
   }
 
@@ -8932,9 +8993,17 @@
       if (app.id === 'languages' && current()) renderCard();
     });
   }
+  // On a phone only the language learned shows; tapping it shows the others.
   $('targets').addEventListener('click', (e) => {
     const btn = e.target.closest('[data-target]');
-    if (!btn || btn.dataset.target === state.settings.target) return;
+    if (!btn) return;
+    const list = $('targets');
+    if (btn.dataset.target === state.settings.target) {
+      list.classList.toggle('open');
+      btn.setAttribute('aria-expanded', String(list.classList.contains('open')));
+      return;
+    }
+    list.classList.remove('open');
     state.settings.target = btn.dataset.target;
     save();
     pauseTimers();
