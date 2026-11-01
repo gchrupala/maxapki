@@ -1832,7 +1832,10 @@
   // highlight, middle, shadow, outline. The price range is also named in the
   // coin rules text.
   // MnożenieMax: keychains with the prime numbers in rising materials. The
-  // ids are the materials, as when they were trophies.
+  // ids are the materials, as when they were trophies. The six from 23 on
+  // came later and cost less than the sapphire 19: by the time a child has
+  // bought that, nearly every fact has paid its coins, and only the daily
+  // bonus is left to buy them with.
   const TROPHIES = [
     ['bronze', 50, 2, '#ffd9b0', '#cd7f32', '#9a5a1e', '#6b3a10'],
     ['silver', 100, 3, '#ffffff', '#cfd5dc', '#9aa3ad', '#5f6874'],
@@ -1842,6 +1845,12 @@
     ['ruby', 500, 13, '#ffc6d0', '#e3245f', '#a10a3f', '#5c0423'],
     ['emerald', 650, 17, '#ccffe2', '#2ecc71', '#17924c', '#0b5a2d'],
     ['sapphire', 800, 19, '#d3e3ff', '#3a78e8', '#1c47a6', '#0d2a66'],
+    ['amethyst', 200, 23, '#f0dcff', '#a46be0', '#6f35a8', '#3d1466'],
+    ['amber', 250, 29, '#ffe9b8', '#f0a01e', '#b8650a', '#6a3604'],
+    ['jade', 300, 31, '#e0f7ea', '#6fbf94', '#3c8a63', '#1d4d36'],
+    ['pearl', 350, 37, '#ffffff', '#f3e9ea', '#cdbcc0', '#7a6870'],
+    ['obsidian', 400, 41, '#8a93a6', '#2f3542', '#1a1d26', '#05060a'],
+    ['opal', 450, 43, '#ffffff', '#cfeef0', '#d9b8e8', '#6a5a8a'],
   ].map(([id, price, prime, ...colors]) => ({ id, price, prime, colors }));
   // StoliceMax: souvenirs of famous sights, each with the country whose
   // capital it stands in (the pyramids stand in Giza, part of greater Cairo).

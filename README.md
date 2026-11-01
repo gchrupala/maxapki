@@ -79,7 +79,7 @@ Coins reward what the child remembers, not the number of cards done. In spaced r
 
 Each fact pays each reward once, so forgetting and relearning earns nothing. Coins never change the schedule. Facts learned before coins were added counted towards the starting balance.
 
-Coins are spent in the shop ("Sklep" in the header) on rewards of the child's choice. In MnożenieMax these are keychains with the prime numbers from 2 to 19, each hanging from a key ring on a short chain. Prices rise with the number and its material:
+Coins are spent in the shop ("Sklep" in the header) on rewards of the child's choice. In MnożenieMax these are keychains with the prime numbers from 2 to 43, each hanging from a key ring on a short chain. Up to 19, prices rise with the number and its material:
 
 | Keychain | Coins |
 | --- | --- |
@@ -91,10 +91,18 @@ Coins are spent in the shop ("Sklep" in the header) on rewards of the child's ch
 | Ruby 13 | 500 |
 | Emerald 17 | 650 |
 | Sapphire 19 | 800 |
+| Amethyst 23 | 200 |
+| Amber 29 | 250 |
+| Jade 31 | 300 |
+| Pearl 37 | 350 |
+| Obsidian 41 | 400 |
+| Opal 43 | 450 |
+
+The keychains from 23 to 43 were added in November 2026 and cost less than the sapphire 19. By the time a child can buy the sapphire, nearly every fact has paid its coins, so mostly the daily bonus of 10 coins is left to buy them with. At the prices of the first eight they would come about 100 days apart.
 
 Until October 2026 these were trophies in the same materials. A trophy bought then now shows as the keychain of its material.
 
-Buying takes two taps (buy, then confirm), so a mis-tap does not spend coins. A purchase shows the keychain and lets confetti fall from the top of the screen for 4 seconds; with reduced motion switched on in the device settings, only the keychain is shown. The coin counter in the header shows the coins that can still be spent; next to it is the button of the [collection](#collection-and-gifts), with the number of rewards in all the apps and the latest one bought in this app. The shop lists all keychains bought, with their number next to the heading of the list. A keychain for sale that is already in the collection is marked with how many there are, such as ×2. The settings show the coins collected and spent. Tapping a reward on that list, or in the collection, shows it large, glowing in its colour, with its name and the date it was bought; a keychain swings gently on its ring. This works the same in all the apps. Done, Back or a tap around it goes back to where it was opened from. Prices, numbers and materials are set in `TROPHIES` in `index.html` (the code still calls all rewards trophies), the rewards in `LEVEL_COINS` and `DAY_BONUS`. In a simulation of a child practising daily with 10 new facts a day, buying each keychain as soon as possible, the bronze 2 comes on day 1, the gold 5 on day 5, the diamond 11 on day 13 and the sapphire 19 on day 29.
+Buying takes two taps (buy, then confirm), so a mis-tap does not spend coins. A purchase shows the keychain and lets confetti fall from the top of the screen for 4 seconds; with reduced motion switched on in the device settings, only the keychain is shown. The coin counter in the header shows the coins that can still be spent; next to it is the button of the [collection](#collection-and-gifts), with the number of rewards in all the apps and the latest one bought in this app. The shop lists all keychains bought, with their number next to the heading of the list. A keychain for sale that is already in the collection is marked with how many there are, such as ×2. The settings show the coins collected and spent. Tapping a reward on that list, or in the collection, shows it large, glowing in its colour, with its name and the date it was bought; a keychain swings gently on its ring. This works the same in all the apps. Done, Back or a tap around it goes back to where it was opened from. Prices, numbers and materials are set in `TROPHIES` in `index.html` (the code still calls all rewards trophies), the rewards in `LEVEL_COINS` and `DAY_BONUS`. In a simulation of a child practising daily with 10 new facts a day, buying each keychain as soon as possible, the bronze 2 comes on day 1, the gold 5 on day 5, the diamond 11 on day 13, the sapphire 19 on day 29, and the six later keychains on days 30, 33, 37, 51, 77 and 115 (12 × 12 with the extra numbers 15, 20 and 25, the median of 20 runs).
 
 ### Order of cards
 
