@@ -6986,8 +6986,10 @@
     pin: '#e2453c',
     pinEdge: '#8f2620',
     needle: '#4a5160',
-    stand: '#c9d1da', // silver, as on the school globe
-    standEdge: '#5f6874',
+    stand: '#a86b3c', // brown wood
+    standEdge: '#5b3417',
+    standGrain: '#7f4a22',
+    standLight: '#cf9560',
   };
   const GLOBE_BURST = 2.3; // seconds until the pins fly out
   const GLOBE_MAX_MS = 6000; // stops if the page is too slow to finish
@@ -7249,28 +7251,50 @@
         ctx.stroke();
         return;
       }
-      ctx.lineWidth = Math.max(3, R * 0.1);
-      ctx.beginPath();
-      ctx.moveTo(0, pole * RING);
-      ctx.lineTo(0, R * 1.2);
-      ctx.stroke();
+      // The neck and the half ring: wood with a dark edge, a light stripe
+      // and a darker line of grain.
+      const wood = (shape, width, least) => {
+        for (const [color, k] of [[GLOBE_COLORS.standEdge, 1], [GLOBE_COLORS.stand, 0.6], [GLOBE_COLORS.standLight, 0.2]]) {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = Math.max(least, R * width) * k;
+          ctx.beginPath();
+          shape();
+          ctx.stroke();
+        }
+      };
+      wood(() => {
+        ctx.moveTo(0, pole * RING);
+        ctx.lineTo(0, R * 1.2);
+      }, 0.1, 3);
+      // The foot, with lines of grain across it.
+      const foot = new Path2D();
+      foot.moveTo(-0.42 * R, 1.2 * R);
+      foot.lineTo(0.42 * R, 1.2 * R);
+      foot.lineTo(0.6 * R, FOOT * R);
+      foot.lineTo(-0.6 * R, FOOT * R);
+      foot.closePath();
       ctx.fillStyle = GLOBE_COLORS.stand;
-      ctx.lineWidth = Math.max(1, R * 0.03);
+      ctx.fill(foot);
+      ctx.save();
+      ctx.clip(foot);
+      ctx.strokeStyle = GLOBE_COLORS.standGrain;
+      ctx.lineWidth = Math.max(0.8, R * 0.012);
       ctx.beginPath();
-      ctx.moveTo(-0.42 * R, 1.2 * R);
-      ctx.lineTo(0.42 * R, 1.2 * R);
-      ctx.lineTo(0.6 * R, FOOT * R);
-      ctx.lineTo(-0.6 * R, FOOT * R);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      for (const [color, width, least] of [[GLOBE_COLORS.standEdge, 0.09, 3], [GLOBE_COLORS.stand, 0.055, 2]]) {
-        ctx.strokeStyle = color;
-        ctx.lineWidth = Math.max(least, R * width);
-        ctx.beginPath();
-        ctx.ellipse(0, 0, R * RING, pole * RING, 0, -Math.PI / 2, Math.PI / 2);
-        ctx.stroke();
+      for (const [y, wave] of [[1.27, 0.02], [1.34, -0.025], [1.42, 0.02]]) {
+        ctx.moveTo(-0.7 * R, y * R);
+        ctx.bezierCurveTo(-0.25 * R, (y + wave) * R, 0.15 * R, (y - wave) * R, 0.7 * R, (y + wave * 0.5) * R);
       }
+      ctx.stroke();
+      ctx.restore();
+      ctx.strokeStyle = GLOBE_COLORS.standEdge;
+      ctx.lineWidth = Math.max(1, R * 0.03);
+      ctx.stroke(foot);
+      wood(() => ctx.ellipse(0, 0, R * RING, pole * RING, 0, -Math.PI / 2, Math.PI / 2), 0.09, 3);
+      ctx.strokeStyle = GLOBE_COLORS.standGrain;
+      ctx.lineWidth = Math.max(0.6, R * 0.008);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, R * (RING + 0.02), pole * (RING + 0.02), 0, -Math.PI * 0.4, Math.PI * 0.35);
+      ctx.stroke();
     };
     // A pin flies off the way the globe flung it, outwards, and falls. Those
     // that point at the viewer come closer and grow, those on the far side
