@@ -433,8 +433,9 @@
   .trophies .shiny .bubble { animation: none; opacity: 0.7; }
   .confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
   /* AstronomiaMax: the rocket's dust covers the new trophy, which is gone
-     when the dust clears. */
-  .confetti.dust { z-index: 32; }
+     when the dust clears. MapkiMax: the pins of the globe fly out over the
+     message, which goes as they do. */
+  .confetti.dust, .confetti.globe { z-index: 32; }
   /* BiologiaMax: the butterflies fly over everything, the message too. */
   .confetti.flutter { z-index: 34; }
   .trophy-banner.vanish { animation: vanish 0.4s ease-in forwards; }
@@ -6136,13 +6137,13 @@
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
       // A keychain gets confetti, a souvenir fireworks, glassware an
       // exploding elixir, a literary prize a rain of letters, a city symbol
-      // thought bubbles, a map a paper plane, a planet trophy a rocket, a
-      // specimen butterflies.
+      // thought bubbles, a map a globe whose pins fly out, a planet trophy a
+      // rocket, a specimen butterflies.
       if (isTimes()) confetti(CELEBRATION_MS);
       else if (app.id === 'capitals') fireworks(CELEBRATION_MS, fireworksSound());
       else if (app.id === 'chemistry') elixirBurst(CELEBRATION_MS);
       else if (app.id === 'literature') letterRain(RAIN_MAX_MS);
-      else if (app.id === 'maps') planeRoute(CELEBRATION_MS);
+      else if (app.id === 'maps') globePins(banner);
       else if (app.id === 'astronomy') rocketDust(banner);
       else if (app.id === 'biology') butterflyLift(banner);
       else speechBubbles(CELEBRATION_MS);
@@ -6972,110 +6973,374 @@
     requestAnimationFrame(frame);
   }
 
-  // MapkiMax: a paper plane flies across the screen along a winding route
-  // and leaves it behind as a dashed line; pins drop onto the route one
-  // after another, and everything fades at the end.
-  const PIN_COLORS = ['#e2453c', '#2a4fc2', '#14804a', '#f5b800', '#9b5de5'];
-  function planeRoute(ms) {
+  // MapkiMax: a globe full of red pins, which stand in places the app
+  // teaches, turns faster and faster and starts to wobble and shake, until
+  // the pins fly out in all directions. The message with the new reward
+  // goes as they do, and the bare globe shrinks away.
+  const GLOBE_COLORS = {
+    sea: '#3a82c9',
+    land: '#8cc46c',
+    ice: '#f3f7fb',
+    lines: 'rgb(255 255 255 / 0.3)', // meridians and parallels
+    pin: '#e2453c',
+    pinEdge: '#8f2620',
+    needle: '#4a5160',
+  };
+  const GLOBE_BURST = 2.3; // seconds until the pins fly out
+  const GLOBE_MAX_MS = 6000; // stops if the page is too slow to finish
+  // The Earth as one picture, longitude across and latitude down, drawn from
+  // the base map the first time it is needed: [width, height, pixels].
+  let globeMap = null;
+  function globeTexture() {
+    if (globeMap) return globeMap;
+    const W = 1024; // a power of 2, so that longitudes wrap with &
+    const H = 512;
     const canvas = document.createElement('canvas');
-    canvas.className = 'confetti';
+    canvas.width = W;
+    canvas.height = H;
+    const g = canvas.getContext('2d');
+    g.fillStyle = GLOBE_COLORS.sea;
+    g.fillRect(0, 0, W, H);
+    // Each ring is filled on its own (a path of thousands of rings takes
+    // the browser more than a second), without the points less than half a
+    // pixel from the last one.
+    const ring = (pts) => {
+      g.beginPath();
+      let px = Infinity;
+      let py = Infinity;
+      for (let i = 0; i < pts.length; i += 2) {
+        const x = ((pts[i] + 180) / 360) * W;
+        const y = ((90 - pts[i + 1]) / 180) * H;
+        if (Math.abs(x - px) + Math.abs(y - py) < 0.5) continue;
+        if (px === Infinity) g.moveTo(x, y);
+        else g.lineTo(x, y);
+        px = x;
+        py = y;
+      }
+      g.fill();
+    };
+    // The rings of land go clockwise. One going the other way is a hole
+    // (the Caspian Sea), filled with sea after the land. Islands smaller
+    // than a pixel of the picture (most of the rings) are left out.
+    const holes = [];
+    g.fillStyle = GLOBE_COLORS.land;
+    for (const text of MAP.land) {
+      const pts = GEO.decode(text);
+      let area = 0;
+      let [west, east, south, north] = [180, -180, 90, -90];
+      for (let i = 0; i < pts.length; i += 2) {
+        const j = (i + 2) % pts.length;
+        area += pts[i] * pts[j + 1] - pts[j] * pts[i + 1];
+        west = Math.min(west, pts[i]);
+        east = Math.max(east, pts[i]);
+        south = Math.min(south, pts[i + 1]);
+        north = Math.max(north, pts[i + 1]);
+      }
+      if (east - west < 360 / W && north - south < 180 / H) continue;
+      if (area > 0) holes.push(pts);
+      else ring(pts);
+    }
+    g.fillStyle = GLOBE_COLORS.sea;
+    holes.forEach(ring);
+    g.fillStyle = GLOBE_COLORS.ice;
+    MAP.ice.forEach((text) => ring(GEO.decode(text)));
+    g.fillStyle = GLOBE_COLORS.sea;
+    MAP.lakes.forEach((text) => ring(GEO.decode(text)));
+    // Meridians and parallels every 30 degrees.
+    g.strokeStyle = GLOBE_COLORS.lines;
+    g.lineWidth = 2;
+    g.beginPath();
+    for (let k = 0; k <= 12; k++) {
+      g.moveTo((k * W) / 12, 0);
+      g.lineTo((k * W) / 12, H);
+    }
+    for (let k = 1; k < 6; k++) {
+      g.moveTo(0, (k * H) / 6);
+      g.lineTo(W, (k * H) / 6);
+    }
+    g.stroke();
+    globeMap = [W, H, new Uint32Array(g.getImageData(0, 0, W, H).data.buffer)];
+    return globeMap;
+  }
+  function globePins(banner) {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'confetti globe';
     canvas.setAttribute('aria-hidden', 'true');
     document.body.appendChild(canvas);
     const ctx = canvas.getContext('2d');
     const ratio = Math.min(2, window.devicePixelRatio || 1);
-    const fly = ms * 0.6; // the time the plane takes to cross
+    const rand = (a, b) => a + Math.random() * (b - a);
+    const RAD = Math.PI / 180;
+    // The globe stands under the banner, or beside it where there is much
+    // more room there (a phone on its side). The banner is still growing
+    // in: its middle is where it will be, but its size is read without the
+    // growing.
+    const rect = banner.getBoundingClientRect();
+    const bx = rect.left + rect.width / 2;
+    const by = rect.top + rect.height / 2;
+    const bottom = by + banner.offsetHeight / 2;
+    const below = innerHeight - bottom;
+    const side = (innerWidth - banner.offsetWidth) / 2;
+    const underR = Math.min(innerWidth * 0.3, below * 0.36, 190);
+    const besideR = Math.min(side * 0.36, innerHeight * 0.3, 190);
+    const beside = besideR > underR * 1.3;
+    const R = Math.max(45, beside ? besideR : underR);
     const rtl = document.documentElement.dir === 'rtl';
-    const y0 = 0.3 + Math.random() * 0.15;
-    const waves = 1.2 + Math.random() * 0.8;
-    const phase = Math.random() * Math.PI;
-    // The route from one side to the other, t from 0 to 1, in pixels.
-    const route = (t) => {
-      const x = innerWidth * (-0.08 + 1.16 * t);
-      return [rtl ? innerWidth - x : x, innerHeight * (y0 + 0.25 * t + 0.1 * Math.sin(phase + t * waves * Math.PI * 2))];
+    const cx = beside ? bx + (rtl ? -1 : 1) * (banner.offsetWidth / 2 + side / 2) : innerWidth / 2;
+    const cy = beside ? Math.max(R * 1.3, Math.min(innerHeight - R * 1.25, by)) : Math.min(innerHeight - R * 1.25, bottom + below / 2);
+    const size = R / 120;
+
+    // The globe is drawn pixel by pixel into a canvas of its own. For each
+    // pixel, the latitude and longitude it shows are worked out once, for
+    // the globe turned to longitude 0; turning it only shifts the
+    // longitudes. The north pole is tipped towards the viewer (TIP).
+    const [MW, MH, map] = globeTexture();
+    const D = Math.min(440, Math.ceil(2 * R * Math.min(1.5, ratio)));
+    const disc = document.createElement('canvas');
+    disc.width = disc.height = D;
+    const dctx = disc.getContext('2d');
+    const image = dctx.createImageData(D, D);
+    const pixels = new Uint32Array(image.data.buffer);
+    const TIP = 0.3;
+    const sinT = Math.sin(TIP);
+    const cosT = Math.cos(TIP);
+    const at = new Int32Array(D * D);
+    const rows = new Int32Array(D * D);
+    const cols = new Float32Array(D * D);
+    let n = 0;
+    for (let j = 0; j < D; j++) {
+      for (let i = 0; i < D; i++) {
+        let x = (2 * i + 1) / D - 1;
+        let y = 1 - (2 * j + 1) / D;
+        const d = x * x + y * y;
+        if (d > 1.04) continue;
+        // Pixels just past the edge show the edge; clipping cuts them off
+        // smoothly.
+        if (d > 1) {
+          x /= Math.sqrt(d);
+          y /= Math.sqrt(d);
+        }
+        const z = Math.sqrt(Math.max(0, 1 - x * x - y * y));
+        const lat = Math.asin(Math.max(-1, Math.min(1, cosT * y + sinT * z)));
+        const lon = Math.atan2(x, cosT * z - sinT * y);
+        at[n] = j * D + i;
+        rows[n] = Math.min(MH - 1, Math.floor((0.5 - lat / Math.PI) * MH)) * MW;
+        cols[n] = (lon / (2 * Math.PI)) * MW;
+        n++;
+      }
+    }
+    // The globe with longitude lon0 in its middle.
+    const paint = (lon0) => {
+      const shift = ((((lon0 % 360) + 360) % 360 + 180) / 360) * MW;
+      for (let k = 0; k < n; k++) pixels[at[k]] = map[rows[k] + (((cols[k] + shift) | 0) & (MW - 1))];
+      dctx.putImageData(image, 0, 0);
     };
-    const pins = [0.16, 0.36, 0.56, 0.76].map((t, i) => ({ t, color: PIN_COLORS[i], at: t * fly }));
-    const bounce = (k) => (k < 0.7 ? (k / 0.7) ** 2 : 1 - 0.12 * Math.sin(((k - 0.7) / 0.3) * Math.PI));
+
+    // It turns slowly at first, then faster and faster (FAST turns a second
+    // when the pins fly out), and on at that speed; wild goes from 0 to 1 on
+    // the way. The Earth turns from west to east, so the longitude in the
+    // middle goes down.
+    const SLOW = 0.25;
+    const FAST = 3.2;
+    const lon0 = rand(-180, 180);
+    const middle = (t) => {
+      const u = Math.min(t, GLOBE_BURST);
+      const turns = SLOW * u + ((FAST - SLOW) * u ** 3) / (3 * GLOBE_BURST ** 2) + FAST * Math.max(0, t - GLOBE_BURST);
+      return lon0 - 360 * turns;
+    };
+    const wild = (t) => Math.min(1, t / GLOBE_BURST) ** 2;
+    // The axis leans 23.4 degrees, and sways more and more.
+    const axis = (t) => 23.4 * RAD + 0.4 * wild(t) * Math.sin(2 * Math.PI * 2.6 * t);
+    // It pops up, and after the pins have gone, shrinks away.
+    const SHRINK = GLOBE_BURST + 0.3;
+    const scaleAt = (t) => {
+      if (t < 0.35) {
+        const k = t / 0.35 - 1;
+        return 1 + 2.7 * k ** 3 + 1.7 * k ** 2;
+      }
+      return Math.max(0, 1 - Math.max(0, (t - SHRINK) / 0.5) ** 2);
+    };
+
+    // The pins, at least 12 degrees apart. They work loose before they fly
+    // out: their needles get longer.
+    const pins = [];
+    for (const place of shuffle(PLACES.slice())) {
+      const [lon, lat] = place.at;
+      const v = [Math.cos(lat * RAD) * Math.sin(lon * RAD), Math.sin(lat * RAD), Math.cos(lat * RAD) * Math.cos(lon * RAD)];
+      if (pins.some((p) => p.v[0] * v[0] + p.v[1] * v[1] + p.v[2] * v[2] > Math.cos(12 * RAD))) continue;
+      pins.push({ lon, lat, v, free: GLOBE_BURST + rand(0, 0.25), flying: null });
+    }
+    const NEEDLE = 0.15; // of the radius
+    const needleAt = (t) => NEEDLE * (1 + 0.6 * Math.max(0, Math.min(1, (t - GLOBE_BURST + 0.6) / 0.6)) ** 2);
+    const HEAD = Math.max(4, R * 0.055);
+    const WIDTH = Math.max(1.4, R * 0.014);
+    // Where a pin is at time t: x to the right, y up and z towards the
+    // viewer, on a globe of radius 1.
+    const view = (pin, t) => {
+      const lon = (pin.lon - middle(t)) * RAD;
+      const lat = pin.lat * RAD;
+      const qx = Math.cos(lat) * Math.sin(lon);
+      const qy = Math.sin(lat);
+      const qz = Math.cos(lat) * Math.cos(lon);
+      return [qx, cosT * qy - sinT * qz, sinT * qy + cosT * qz];
+    };
+    const drawGlobePin = (fx, fy, hx, hy, r, width) => {
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = GLOBE_COLORS.needle;
+      ctx.lineWidth = width;
+      ctx.beginPath();
+      ctx.moveTo(fx, fy);
+      ctx.lineTo(hx, hy);
+      ctx.stroke();
+      ctx.fillStyle = GLOBE_COLORS.pin;
+      ctx.strokeStyle = GLOBE_COLORS.pinEdge;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(hx, hy, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = 'rgb(255 255 255 / 0.7)';
+      ctx.beginPath();
+      ctx.arc(hx - r * 0.35, hy - r * 0.35, r * 0.32, 0, Math.PI * 2);
+      ctx.fill();
+    };
+    // A pin on the globe, in the coordinates of the globe.
+    const pinOnGlobe = ([x, y, z], needle) => {
+      const k = R * (1 + needle);
+      drawGlobePin(x * R, -y * R, x * k, -y * k, HEAD * (1 + 0.12 * z), WIDTH);
+    };
+    // From the coordinates of the globe to those of the page.
+    const toPage = (x, y, t, ox, oy) => {
+      const a = axis(t);
+      const s = scaleAt(t);
+      return [ox + s * (x * Math.cos(a) - y * Math.sin(a)), oy + s * (x * Math.sin(a) + y * Math.cos(a))];
+    };
+    // A pin flies off the way the globe flung it, outwards, and falls. Those
+    // that point at the viewer come closer and grow, those on the far side
+    // shrink a little.
+    const GRAVITY = 700 * size;
+    const fling = (pin, t, ox, oy) => {
+      const needle = needleAt(t);
+      const ends = (time) => {
+        const [x, y, z] = view(pin, time);
+        return [toPage(x * R, -y * R, time, ox, oy), toPage(x * R * (1 + needle), -y * R * (1 + needle), time, ox, oy), z];
+      };
+      const [foot, head, z] = ends(t);
+      const [, later] = ends(t + 0.01);
+      let dx = head[0] - ox;
+      let dy = head[1] - oy;
+      const out = Math.hypot(dx, dy);
+      if (out < 1) {
+        const a = rand(0, Math.PI * 2);
+        [dx, dy] = [Math.cos(a), Math.sin(a)];
+      } else {
+        dx /= out;
+        dy /= out;
+      }
+      const speed = rand(300, 600) * size;
+      return {
+        born: t,
+        x: head[0],
+        y: head[1],
+        vx: ((later[0] - head[0]) / 0.01) * 0.35 + dx * speed,
+        vy: ((later[1] - head[1]) / 0.01) * 0.35 + dy * speed - 150 * size,
+        angle: Math.atan2(head[1] - foot[1], head[0] - foot[0]),
+        spin: rand(6, 12) * (Math.random() < 0.5 ? -1 : 1),
+        length: Math.hypot(head[0] - foot[0], head[1] - foot[1]),
+        grow: z * 1.4,
+        behind: z < 0,
+        gone: false,
+      };
+    };
+    const drawFlying = (f, t) => {
+      const age = t - f.born;
+      const x = f.x + f.vx * age;
+      const y = f.y + f.vy * age + 0.5 * GRAVITY * age * age;
+      const g = Math.max(0.6, Math.min(2.4, 1 + f.grow * age));
+      if (age > 1.6 || x < -80 || x > innerWidth + 80 || y > innerHeight + 80) {
+        f.gone = true;
+        return;
+      }
+      const a = f.angle + f.spin * age;
+      const length = (f.length + (R * NEEDLE * 1.6 - f.length) * Math.min(1, age / 0.2)) * g;
+      drawGlobePin(x - length * Math.cos(a), y - length * Math.sin(a), x, y, HEAD * g, WIDTH * g);
+    };
+
     const start = performance.now();
+    let vanished = false;
     const frame = (now) => {
       const elapsed = Math.max(0, now - start);
+      const t = elapsed / 1000;
       if (canvas.width !== Math.round(innerWidth * ratio)) {
         canvas.width = Math.round(innerWidth * ratio);
         canvas.height = Math.round(innerHeight * ratio);
       }
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       ctx.clearRect(0, 0, innerWidth, innerHeight);
-      const fade = Math.max(0, Math.min(1, (ms - elapsed) / 700));
-      ctx.globalAlpha = fade;
-      const done = Math.min(1, elapsed / fly);
-      // The dashed route behind the plane.
-      ctx.setLineDash([9, 8]);
-      ctx.lineWidth = 3;
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = 'rgb(29 39 66 / 0.6)';
-      ctx.beginPath();
-      for (let i = 0; i <= 80; i++) {
-        const [x, y] = route((done * i) / 80);
-        if (i) ctx.lineTo(x, y);
-        else ctx.moveTo(x, y);
-      }
-      ctx.stroke();
-      ctx.setLineDash([]);
-      for (const p of pins) {
-        const age = elapsed - p.at;
-        if (age < 0) continue;
-        const [x, y] = route(p.t);
-        const k = Math.min(1, age / 450);
-        if (age < 900) {
-          // A ring spreads where the pin lands.
-          const r = 6 + (age / 900) * 26;
-          ctx.globalAlpha = fade * (1 - age / 900);
-          ctx.strokeStyle = p.color;
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.ellipse(x, y, r, r * 0.4, 0, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.globalAlpha = fade;
+      // The globe shakes harder and harder.
+      const shake = 5 * size * wild(t) ** 3;
+      const ox = cx + rand(-1, 1) * shake;
+      const oy = cy + rand(-1, 1) * shake;
+      for (const pin of pins) {
+        if (pin.flying || t < pin.free) continue;
+        pin.flying = fling(pin, t, ox, oy);
+        if (!vanished) {
+          vanished = true;
+          banner.classList.add('vanish');
+          setTimeout(() => banner.remove(), 400);
         }
-        drawPin(ctx, x, y - 60 * (1 - bounce(k)), p.color);
       }
-      if (done < 1) {
-        const [x, y] = route(done);
-        const [x2, y2] = route(Math.min(1, done + 0.01));
+      const flying = pins.filter((p) => p.flying && !p.flying.gone).map((p) => p.flying);
+      for (const f of flying) if (f.behind) drawFlying(f, t);
+      const s = scaleAt(t);
+      if (s > 0) {
+        const a = axis(t);
+        const needle = needleAt(t);
+        const held = pins.filter((p) => !p.flying).map((p) => view(p, t)).sort((p, q) => p[2] - q[2]);
+        // A soft shadow under the globe.
+        const shadow = ctx.createRadialGradient(ox, oy + R * 1.2 * s, 0, ox, oy + R * 1.2 * s, R * 0.8 * s);
+        shadow.addColorStop(0, 'rgb(0 0 0 / 0.18)');
+        shadow.addColorStop(1, 'rgb(0 0 0 / 0)');
+        ctx.fillStyle = shadow;
+        ctx.beginPath();
+        ctx.ellipse(ox, oy + R * 1.2 * s, R * 0.8 * s, R * 0.12 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
         ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(Math.atan2(y2 - y, x2 - x));
-        ctx.scale(1.4, 1.4);
-        ctx.lineJoin = 'round';
-        ctx.strokeStyle = '#5b6680';
-        ctx.lineWidth = 1;
-        ctx.fillStyle = '#ffffff';
+        ctx.translate(ox, oy);
+        ctx.rotate(a);
+        ctx.scale(s, s);
+        for (const p of held) if (p[2] < 0) pinOnGlobe(p, needle);
+        paint(middle(t));
+        ctx.save();
         ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(-30, -12);
-        ctx.lineTo(-21, 0);
-        ctx.closePath();
-        ctx.fill();
+        ctx.arc(0, 0, R, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(disc, -R, -R, 2 * R, 2 * R);
+        // Light from the top left, whichever way the axis leans.
+        ctx.rotate(-a);
+        const light = ctx.createRadialGradient(-0.4 * R, -0.45 * R, 0, -0.4 * R, -0.45 * R, 1.55 * R);
+        light.addColorStop(0, 'rgb(255 255 255 / 0.4)');
+        light.addColorStop(0.3, 'rgb(255 255 255 / 0)');
+        light.addColorStop(0.7, 'rgb(10 30 60 / 0.08)');
+        light.addColorStop(1, 'rgb(10 30 60 / 0.55)');
+        ctx.fillStyle = light;
+        ctx.fillRect(-R, -R, 2 * R, 2 * R);
+        ctx.restore();
+        ctx.strokeStyle = 'rgb(20 50 90 / 0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, R, 0, Math.PI * 2);
         ctx.stroke();
-        ctx.fillStyle = '#dfe6f2';
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(-21, 0);
-        ctx.lineTo(-28, 10);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = '#b9c4d6';
-        ctx.beginPath();
-        ctx.moveTo(-21, 0);
-        ctx.lineTo(-16, 5);
-        ctx.lineTo(-9, 0);
-        ctx.closePath();
-        ctx.fill();
+        for (const p of held) if (p[2] >= 0) pinOnGlobe(p, needle);
         ctx.restore();
       }
-      ctx.globalAlpha = 1;
-      if (elapsed < ms) requestAnimationFrame(frame);
-      else canvas.remove();
+      for (const f of flying) if (!f.behind) drawFlying(f, t);
+      const busy = s > 0 || pins.some((p) => !p.flying || !p.flying.gone);
+      if (elapsed < GLOBE_MAX_MS && busy) requestAnimationFrame(frame);
+      else {
+        canvas.remove();
+        banner.remove();
+      }
     };
     requestAnimationFrame(frame);
   }
