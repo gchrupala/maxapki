@@ -6974,9 +6974,10 @@
   }
 
   // MapkiMax: a globe full of red pins, which stand in places the app
-  // teaches, turns faster and faster and starts to wobble and shake, until
-  // the pins fly out in all directions. The message with the new reward
-  // goes as they do, and the bare globe shrinks away.
+  // teaches, turns faster and faster on its stand, which starts to rock and
+  // shake, until the pins fly out in all directions. The message with the
+  // new reward goes as they do, and the bare globe shrinks away with its
+  // stand.
   const GLOBE_COLORS = {
     sea: '#3a82c9',
     land: '#8cc46c',
@@ -6985,6 +6986,8 @@
     pin: '#e2453c',
     pinEdge: '#8f2620',
     needle: '#4a5160',
+    stand: '#c9d1da', // silver, as on the school globe
+    standEdge: '#5f6874',
   };
   const GLOBE_BURST = 2.3; // seconds until the pins fly out
   const GLOBE_MAX_MS = 6000; // stops if the page is too slow to finish
@@ -7072,22 +7075,23 @@
     const rand = (a, b) => a + Math.random() * (b - a);
     const RAD = Math.PI / 180;
     // The globe stands under the banner, or beside it where there is much
-    // more room there (a phone on its side). The banner is still growing
-    // in: its middle is where it will be, but its size is read without the
-    // growing.
+    // more room there (a phone on its side). With its pins and stand, it
+    // reaches from 1.3 radii above its middle to 1.5 below. The banner is
+    // still growing in: its middle is where it will be, but its size is read
+    // without the growing.
     const rect = banner.getBoundingClientRect();
     const bx = rect.left + rect.width / 2;
     const by = rect.top + rect.height / 2;
     const bottom = by + banner.offsetHeight / 2;
     const below = innerHeight - bottom;
     const side = (innerWidth - banner.offsetWidth) / 2;
-    const underR = Math.min(innerWidth * 0.3, below * 0.36, 190);
+    const underR = Math.min(innerWidth * 0.3, below * 0.32, 190);
     const besideR = Math.min(side * 0.36, innerHeight * 0.3, 190);
     const beside = besideR > underR * 1.3;
     const R = Math.max(45, beside ? besideR : underR);
     const rtl = document.documentElement.dir === 'rtl';
     const cx = beside ? bx + (rtl ? -1 : 1) * (banner.offsetWidth / 2 + side / 2) : innerWidth / 2;
-    const cy = beside ? Math.max(R * 1.3, Math.min(innerHeight - R * 1.25, by)) : Math.min(innerHeight - R * 1.25, bottom + below / 2);
+    const cy = beside ? Math.max(R * 1.35, Math.min(innerHeight - R * 1.6, by)) : Math.min(innerHeight - R * 1.6, bottom + below / 2 - R * 0.1);
     const size = R / 120;
 
     // The globe is drawn pixel by pixel into a canvas of its own. For each
@@ -7149,8 +7153,13 @@
       return lon0 - 360 * turns;
     };
     const wild = (t) => Math.min(1, t / GLOBE_BURST) ** 2;
-    // The axis leans 23.4 degrees, and sways more and more.
-    const axis = (t) => 23.4 * RAD + 0.4 * wild(t) * Math.sin(2 * Math.PI * 2.6 * t);
+    // The stand, in radii of the globe, after that of the school globe
+    // (globeStand): a half ring that holds the globe at its poles, a neck,
+    // and a foot whose bottom is FOOT below the middle of the globe. The
+    // globe and its stand rock on the foot, more and more.
+    const RING = 1.156;
+    const FOOT = 1.48;
+    const rock = (t) => 0.2 * wild(t) * Math.sin(2 * Math.PI * 2.6 * t);
     // It pops up, and after the pins have gone, shrinks away.
     const SHRINK = GLOBE_BURST + 0.3;
     const scaleAt = (t) => {
@@ -7209,11 +7218,59 @@
       const k = R * (1 + needle);
       drawGlobePin(x * R, -y * R, x * k, -y * k, HEAD * (1 + 0.12 * z), WIDTH);
     };
-    // From the coordinates of the globe to those of the page.
+    // From the coordinates of the globe to those of the page: scaled about
+    // the middle of the globe, and turned about the bottom of the foot.
     const toPage = (x, y, t, ox, oy) => {
-      const a = axis(t);
+      const a = rock(t);
       const s = scaleAt(t);
-      return [ox + s * (x * Math.cos(a) - y * Math.sin(a)), oy + s * (x * Math.sin(a) + y * Math.cos(a))];
+      const X = s * x;
+      const Y = s * y - FOOT * R;
+      return [ox + X * Math.cos(a) - Y * Math.sin(a), oy + FOOT * R + X * Math.sin(a) + Y * Math.cos(a)];
+    };
+    // The stand, in the coordinates of the globe: the parts behind the globe
+    // (the foot, the neck, the half ring and the rod to the south pole), or
+    // the rod to the north pole and its knob in front of it.
+    const pole = R * Math.cos(TIP); // how far above the middle the north pole is seen
+    const drawStand = (front) => {
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = GLOBE_COLORS.standEdge;
+      ctx.lineWidth = Math.max(2, R * 0.04);
+      ctx.beginPath();
+      ctx.moveTo(0, front ? -pole : pole);
+      ctx.lineTo(0, (front ? -pole : pole) * RING);
+      ctx.stroke();
+      if (front) {
+        ctx.fillStyle = GLOBE_COLORS.stand;
+        ctx.lineWidth = Math.max(1, R * 0.02);
+        ctx.beginPath();
+        ctx.arc(0, -pole * RING, Math.max(2.5, R * 0.075), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        return;
+      }
+      ctx.lineWidth = Math.max(3, R * 0.1);
+      ctx.beginPath();
+      ctx.moveTo(0, pole * RING);
+      ctx.lineTo(0, R * 1.2);
+      ctx.stroke();
+      ctx.fillStyle = GLOBE_COLORS.stand;
+      ctx.lineWidth = Math.max(1, R * 0.03);
+      ctx.beginPath();
+      ctx.moveTo(-0.42 * R, 1.2 * R);
+      ctx.lineTo(0.42 * R, 1.2 * R);
+      ctx.lineTo(0.6 * R, FOOT * R);
+      ctx.lineTo(-0.6 * R, FOOT * R);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      for (const [color, width, least] of [[GLOBE_COLORS.standEdge, 0.09, 3], [GLOBE_COLORS.stand, 0.055, 2]]) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = Math.max(least, R * width);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, R * RING, pole * RING, 0, -Math.PI / 2, Math.PI / 2);
+        ctx.stroke();
+      }
     };
     // A pin flies off the way the globe flung it, outwards, and falls. Those
     // that point at the viewer come closer and grow, those on the far side
@@ -7227,8 +7284,9 @@
       };
       const [foot, head, z] = ends(t);
       const [, later] = ends(t + 0.01);
-      let dx = head[0] - ox;
-      let dy = head[1] - oy;
+      const [mx, my] = toPage(0, 0, t, ox, oy);
+      let dx = head[0] - mx;
+      let dy = head[1] - my;
       const out = Math.hypot(dx, dy);
       if (out < 1) {
         const a = rand(0, Math.PI * 2);
@@ -7277,7 +7335,7 @@
       }
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       ctx.clearRect(0, 0, innerWidth, innerHeight);
-      // The globe shakes harder and harder.
+      // The globe and its stand shake harder and harder.
       const shake = 5 * size * wild(t) ** 3;
       const ox = cx + rand(-1, 1) * shake;
       const oy = cy + rand(-1, 1) * shake;
@@ -7294,29 +7352,32 @@
       for (const f of flying) if (f.behind) drawFlying(f, t);
       const s = scaleAt(t);
       if (s > 0) {
-        const a = axis(t);
+        const a = rock(t);
         const needle = needleAt(t);
         const held = pins.filter((p) => !p.flying).map((p) => view(p, t)).sort((p, q) => p[2] - q[2]);
-        // A soft shadow under the globe.
-        const shadow = ctx.createRadialGradient(ox, oy + R * 1.2 * s, 0, ox, oy + R * 1.2 * s, R * 0.8 * s);
-        shadow.addColorStop(0, 'rgb(0 0 0 / 0.18)');
+        // A soft shadow under the foot.
+        const floor = oy + FOOT * R * s;
+        const shadow = ctx.createRadialGradient(ox, floor, 0, ox, floor, R * 0.8 * s);
+        shadow.addColorStop(0, 'rgb(0 0 0 / 0.2)');
         shadow.addColorStop(1, 'rgb(0 0 0 / 0)');
         ctx.fillStyle = shadow;
         ctx.beginPath();
-        ctx.ellipse(ox, oy + R * 1.2 * s, R * 0.8 * s, R * 0.12 * s, 0, 0, Math.PI * 2);
+        ctx.ellipse(ox, floor, R * 0.8 * s, R * 0.1 * s, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.save();
-        ctx.translate(ox, oy);
+        ctx.translate(ox, oy + FOOT * R);
         ctx.rotate(a);
+        ctx.translate(0, -FOOT * R);
         ctx.scale(s, s);
         for (const p of held) if (p[2] < 0) pinOnGlobe(p, needle);
+        drawStand(false);
         paint(middle(t));
         ctx.save();
         ctx.beginPath();
         ctx.arc(0, 0, R, 0, Math.PI * 2);
         ctx.clip();
         ctx.drawImage(disc, -R, -R, 2 * R, 2 * R);
-        // Light from the top left, whichever way the axis leans.
+        // Light from the top left, however the globe leans.
         ctx.rotate(-a);
         const light = ctx.createRadialGradient(-0.4 * R, -0.45 * R, 0, -0.4 * R, -0.45 * R, 1.55 * R);
         light.addColorStop(0, 'rgb(255 255 255 / 0.4)');
@@ -7331,6 +7392,7 @@
         ctx.beginPath();
         ctx.arc(0, 0, R, 0, Math.PI * 2);
         ctx.stroke();
+        drawStand(true);
         for (const p of held) if (p[2] >= 0) pinOnGlobe(p, needle);
         ctx.restore();
       }
