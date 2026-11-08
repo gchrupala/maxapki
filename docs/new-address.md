@@ -46,7 +46,7 @@ The new app is at the root of its address (`/`), the old one at `/Anki/`. Every 
 Both apps would be called "MaxApki" with the same icon, so it would be hard to tell which one to uninstall. So the app at the new address has its own name and icon:
 
 - the name "MaxApki.top" (in `manifest.webmanifest`, and `apple-mobile-web-app-title` for an iPad). The old one keeps "MaxApki".
-- the same cards on a deep blue background instead of the rainbow (`icons/icon.svg` and the PNG icons made from it). A phone often shows no names under the icons, so the icon matters most.
+- a deck of cards with an M on a deep blue background instead of the rainbow (`icons/icon.svg` and the PNG icons made from it). A phone often shows no names under the icons, so the icon matters most.
 
 The message at the new address says to remove the rainbow icon called just "MaxApki".
 

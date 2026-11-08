@@ -27,7 +27,7 @@ Then, on the tablet:
 - **iPad:** open the address in Safari, tap the Share button, then "Add to Home Screen".
 - **Android:** open the address in Chrome, open the ⋮ menu, then "Install app" or "Add to Home screen".
 
-The home-screen name is "MaxApki.top", and its icon shows the cards of the eight apps on a deep blue background. (The app installed from the old address is called "MaxApki", and its icon has a rainbow background.) MnożenieMax, StoliceMax, ChemiaMax, LiteraturaMax, JęzykiMax, MapkiMax, AstronomiaMax and BiologiaMax are opened from inside it. On a tablet where the app was installed as "MnożenieMax", Chrome updates the name and icon by itself when it next checks the app, which can take up to a day; it may ask to confirm the change. Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed. To keep it, or to move it to another device, save it to a file first (see [Moving progress](#moving-progress)) or back it up on GitHub (see [Backing up to GitHub](#backing-up-to-github)).
+The home-screen name is "MaxApki.top", and its icon shows a deck of cards on a deep blue background: a white card with an M in front of cards in the colours of the apps. (The app installed from the old address is called "MaxApki", and its icon has a rainbow background.) MnożenieMax, StoliceMax, ChemiaMax, LiteraturaMax, JęzykiMax, MapkiMax, AstronomiaMax and BiologiaMax are opened from inside it. On a tablet where the app was installed as "MnożenieMax", Chrome updates the name and icon by itself when it next checks the app, which can take up to a day; it may ask to confirm the change. Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed. To keep it, or to move it to another device, save it to a file first (see [Moving progress](#moving-progress)) or back it up on GitHub (see [Backing up to GitHub](#backing-up-to-github)).
 
 The offline copy is kept by `sw.js` (a service worker). On every launch it asks the server whether the app files have changed, so a pushed change appears the next time the app is opened online, once GitHub Pages has published it (usually within a minute or two). Without internet, or if the server takes more than 4 seconds to answer, it uses the stored copy. A change to `sw.js` itself takes one extra launch: the first launch installs the new `sw.js`, the second uses it. Opening `index.html` as a local file still works, but without the offline copy or installation.
 
@@ -141,7 +141,7 @@ The app that was open last opens on the next start. The address can also name th
 
 The share button in the header (three connected dots) opens the share menu of the device with the address of the app, https://maxapki.top/, for example to send it in a message. Where the browser has no share menu, it copies the address and says so.
 
-Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star, those of ChemiaMax an atom, those of LiteraturaMax an open book, those of JęzykiMax a speech bubble, those of MapkiMax a compass rose, those of AstronomiaMax a planet with a ring, those of BiologiaMax a butterfly. The atom is also the symbol on the ChemiaMax card in the app menu; the home-screen icon of MaxApki still shows a flask. The language is shared.
+Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star, those of ChemiaMax an atom, those of LiteraturaMax an open book, those of JęzykiMax a speech bubble, those of MapkiMax a compass rose, those of AstronomiaMax a planet with a ring, those of BiologiaMax a butterfly. The atom is also the symbol on the ChemiaMax card in the app menu. The language is shared.
 
 ### Cards
 
@@ -581,7 +581,7 @@ The repository, the token and the state of the backup are saved on the device un
 - `geo.js`: the map projection, the encoded lines of `maps.js` and `places.js`, and distances on the Earth. It has no dependencies and works in the browser and in Node.
 - `tools/make_maps.py`, `tools/places.txt`: how `maps.js` and `places.js` are made, and the list of places.
 - `tools/recall-test-progress.js`: makes a progress file in which the cards with answers to pick from are learned, so the cards answered in the child's own words can be tried at once (`node tools/recall-test-progress.js nl fr > test.json` for Dutch and French, all languages if none is named; then load it in the settings). It replaces the JęzykiMax progress of that browser.
-- `manifest.webmanifest`, `sw.js`, `icons/`: what makes the web app installable and usable offline. The SVG files in `icons/` are the sources of the PNG icons.
+- `manifest.webmanifest`, `sw.js`, `icons/`: what makes the web app installable and usable offline. The SVG files in `icons/` are the sources of the PNG icons; the M in them is a letter of Grandstander turned into outlines, so they do not need the font.
 - `fonts/`: the Grandstander and Lexend fonts, and Vazirmatn for Persian, with their licences, bundled so the app looks the same offline.
 - `srs.js`: the FSRS scheduler and card queues. It has no dependencies and works in the browser and in Node.
 - `backup.js`: the backup on GitHub: the calls to the GitHub API, and whether a backup may be replaced. It has no dependencies and works in the browser and in Node.

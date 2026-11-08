@@ -1,11 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- MaxApki: the cards of the eight apps in steps, BiologiaMax
-       (butterfly) at the back, then AstronomiaMax (Saturn), MapkiMax
-       (folded map with a pin),
-       JęzykiMax (speech bubbles),
-       LiteraturaMax (book), ChemiaMax (flask), StoliceMax (globe) and
-       MnożenieMax (×) in front. Each symbol sits on the part of its card the
-       next card leaves free. -->
+  <!-- MaxApki: a deck of cards. In front, a white index card with an M (the
+       M of Max, in Grandstander ExtraBold, as outlines). Behind it, fanning
+       out upwards, cards in the colours of the apps, in the order of the
+       rainbow: LiteraturaMax, JęzykiMax, ChemiaMax, MapkiMax, MnożenieMax,
+       AstronomiaMax and StoliceMax. BiologiaMax (pink) is left out: seven
+       stripes read better than eight at small sizes. -->
   <defs>
     <!-- Deep blue for MaxApki.top. The app at the old address, MaxApki, has
          a rainbow here, so the two can be told apart on a home screen. -->
@@ -13,78 +12,26 @@
       <stop offset="0" stop-color="#2a3a8f"/>
       <stop offset="1" stop-color="#0f1640"/>
     </linearGradient>
+    <!-- One index card, centred on 0,0. A thin light edge keeps the dark
+         AstronomiaMax card visible on the deep blue. -->
+    <rect id="card" x="-160" y="-100" width="320" height="200" rx="18" stroke="#fff" stroke-opacity="0.18" stroke-width="2"/>
   </defs>
   <rect width="512" height="512" fill="url(#bg)"/>
-  <!-- Eight cards fill more room than seven: all are made smaller to stay
-       in the middle, where a round icon mask leaves them whole. -->
-  <g transform="translate(33.9 123.6) scale(0.686)">
-  <rect x="419.5" y="7" width="120" height="70" rx="8" fill="#7d1a44"/>
-  <rect x="416" y="1" width="120" height="70" rx="8" fill="#ffffff"/>
-  <line x1="416" y1="18" x2="536" y2="18" stroke="#e2645a" stroke-width="3"/>
-  <g transform="translate(514 46) scale(0.3) translate(-256 -281)">
-    <g fill="#f39a1e" stroke="#1d2742" stroke-width="9" stroke-linejoin="round">
-      <path d="M250 268c-14-26-44-44-66-36-18 7-14 34 8 48 16 10 38 12 58 4z"/><path d="M250 286c-20 0-42 10-48 28-5 15 8 25 22 18 14-7 24-24 26-46z"/>
-      <g transform="matrix(-1 0 0 1 512 0)"><path d="M250 268c-14-26-44-44-66-36-18 7-14 34 8 48 16 10 38 12 58 4z"/><path d="M250 286c-20 0-42 10-48 28-5 15 8 25 22 18 14-7 24-24 26-46z"/></g>
+  <!-- The deck stays inside the middle circle that a round icon mask keeps. -->
+  <g transform="translate(250 290) scale(0.9)">
+    <use href="#card" transform="translate(14 -107) rotate(16.4)" fill="#7b3fc4"/>
+    <use href="#card" transform="translate(12 -86) rotate(13.2)" fill="#1d2766"/>
+    <use href="#card" transform="translate(10 -65) rotate(10)" fill="#2a4fc2"/>
+    <use href="#card" transform="translate(8 -44) rotate(6.8)" fill="#0d8a86"/>
+    <use href="#card" transform="translate(6 -23) rotate(3.6)" fill="#1f9d55"/>
+    <use href="#card" transform="translate(4 -2) rotate(0.4)" fill="#e8710a"/>
+    <use href="#card" transform="translate(2 19) rotate(-2.8)" fill="#c0392b"/>
+    <g transform="translate(0 40) rotate(-6)">
+      <use href="#card" fill="#fff"/>
+      <line x1="-160" y1="-52" x2="160" y2="-52" stroke="#e2645a" stroke-width="6"/>
+      <line x1="-144" y1="4" x2="144" y2="4" stroke="#dbe5f4" stroke-width="4.4"/>
+      <line x1="-144" y1="56" x2="144" y2="56" stroke="#dbe5f4" stroke-width="4.4"/>
+      <path transform="translate(-62.8 72) scale(0.085 -0.085)" fill="#1d2742" d="M93.4 3.4Q93.4 74 94.1 184.3Q94.8 294.6 96.5 428.3Q98.2 562 101.3 705.6Q104.4 849.2 108.7 988Q113 1126.8 119.2 1245.5Q173.5 1251 246.7 1254.2Q319.9 1257.4 390.9 1259.2Q461.9 1261.1 510.9 1261.6Q560 1262 565 1262Q566.9 1258 578.1 1217.1Q589.4 1176.1 607 1111.1Q624.6 1046.1 645.1 968Q665.6 889.9 686.6 809.5Q707.6 729.1 726.2 657.1Q744.8 585 757.4 533.1Q770 481.1 773.8 460.9L733 455.6Q742.6 481.6 760.5 540.8Q778.4 599.9 801.3 678.5Q824.2 757.1 848.4 843.8Q872.6 930.4 895.1 1012.2Q917.5 1094 934.2 1158.4Q951 1222.9 957.8 1256.5Q1005 1256.5 1077.7 1254.6Q1150.4 1252.6 1225.1 1248.1Q1299.8 1243.5 1349.8 1234.6Q1369.8 1145.4 1378 1007.5Q1386.2 869.6 1386.2 714.4Q1386.2 586.1 1382.2 453.8Q1378.2 321.5 1371.8 205Q1365.4 88.5 1358.6 6.6Q1303.6 6.6 1239.4 8.9Q1175.2 11.1 1118.1 14.8Q1061 18.5 1027.9 20.4Q1032.1 73.9 1036.6 167.4Q1041.1 261 1044.6 362Q1047.2 424 1049.2 484.9Q1051.2 545.9 1053.2 595.7Q1055.2 645.5 1056.8 673.4Q1047.1 637.4 1029.2 581.4Q1011.4 525.4 989.3 458.7Q967.2 392 943.5 323.6Q919.8 255.2 897.8 193.6Q875.9 131.9 859.1 86.4Q842.4 41 833 21Q817.2 20 786.2 19.5Q755.1 19 738.9 19Q710 19 679.3 21.8Q648.6 24.5 610.4 28.2Q607.6 43.6 599 81.9Q590.4 120.2 577.8 175.7Q565.1 231.1 550.4 296.1Q535.6 361 520.2 428.4Q504.9 495.9 489.8 559.6Q474.6 623.2 461.8 676.1Q448.9 728.9 440 763.1Q440.8 669.5 441.6 568.1Q442.4 466.6 442.8 371Q443.1 275.4 443.5 196.9Q443.9 118.5 444.2 68Q444.6 17.5 444.6 8.4Q404.9 7.4 344.6 5.9Q284.4 4.5 218.3 3.9Q152.2 3.4 93.4 3.4Z"/>
     </g>
-    <circle cx="214" cy="256" r="10" fill="#fff"/>
-    <circle cx="298" cy="256" r="10" fill="#fff"/>
-    <path d="M256 252v68" stroke="#1d2742" stroke-width="16" stroke-linecap="round"/>
-    <path d="M252 252c-6-14-14-22-26-26M260 252c6-14 14-22 26-26" fill="none" stroke="#1d2742" stroke-width="7" stroke-linecap="round"/>
-  </g>
-  <rect x="375.5" y="51" width="120" height="70" rx="8" fill="#0f1640"/>
-  <rect x="372" y="45" width="120" height="70" rx="8" fill="#ffffff"/>
-  <line x1="372" y1="62" x2="492" y2="62" stroke="#e2645a" stroke-width="3"/>
-  <g transform="rotate(-16 470 88)" fill="none" stroke="#1d2742" stroke-width="2.4">
-    <path d="M452 88a18 5 0 0 1 36 0"/>
-    <circle cx="470" cy="88" r="9" fill="#f2c96b"/>
-    <path d="M462.5 85.5c5 1.6 10 1.6 15 0" stroke="#c98f2c" stroke-width="2"/>
-    <path d="M488 88a18 5 0 0 1-36 0"/>
-  </g>
-  <path d="M483 66l1.6 3.4 3.4 1.6-3.4 1.6-1.6 3.4-1.6-3.4-3.4-1.6 3.4-1.6z" fill="#ffc928" stroke="#1d2742" stroke-width="1"/>
-  <rect x="331.5" y="95" width="120" height="70" rx="8" fill="#075c59"/>
-  <rect x="328" y="89" width="120" height="70" rx="8" fill="#ffffff"/>
-  <line x1="328" y1="106" x2="448" y2="106" stroke="#e2645a" stroke-width="3"/>
-  <path d="M409 120l10.5-3 10.5 3 10.5-3v27l-10.5 3-10.5-3-10.5 3z" fill="#9fe0c8" stroke="#1d2742" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M419.5 117v27M430 120v27" stroke="#1d2742" stroke-width="2.4"/>
-  <path d="M433 135c-4.4-5-7-8.4-7-11.4a7 7 0 0 1 14 0c0 3-2.6 6.4-7 11.4z" fill="#e2453c" stroke="#1d2742" stroke-width="2"/>
-  <circle cx="433" cy="123.6" r="2.4" fill="#fff"/>
-  <rect x="287.5" y="139" width="120" height="70" rx="8" fill="#9c4a05"/>
-  <rect x="284" y="133" width="120" height="70" rx="8" fill="#ffffff"/>
-  <line x1="284" y1="150" x2="404" y2="150" stroke="#e2645a" stroke-width="3"/>
-  <path d="M365 158h18a4 4 0 0 1 4 4v9a4 4 0 0 1-4 4h-11l-6 6 1-6h-2a4 4 0 0 1-4-4v-9a4 4 0 0 1 4-4z" fill="#2a7de1"/>
-  <path d="M366 164h16M366 170h10" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
-  <path d="M379 174h18a4 4 0 0 1 4 4v9a4 4 0 0 1-4 4h-1l2 6-7-6h-12a4 4 0 0 1-4-4v-9a4 4 0 0 1 4-4z" fill="#ff9f1c"/>
-  <path d="M380 180h16M380 186h10" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
-  <rect x="243.5" y="183" width="120" height="70" rx="8" fill="#7d2219"/>
-  <rect x="240" y="177" width="120" height="70" rx="8" fill="#ffffff"/>
-  <line x1="240" y1="194" x2="360" y2="194" stroke="#e2645a" stroke-width="3"/>
-  <path d="M338 214c-6-4-13.6-5-18.7-3.4v20.4c5.1-1.7 12.7-.9 18.7 3.4zM338 214c6-4 13.6-5 18.7-3.4v20.4c-5.1-1.7-12.7-.9-18.7 3.4z" fill="#ffe08a" stroke="#1d2742" stroke-width="3.4" stroke-linejoin="round"/>
-  <rect x="199.5" y="227" width="120" height="70" rx="8" fill="#4f2386"/>
-  <rect x="196" y="221" width="120" height="70" rx="8" fill="#ffffff"/>
-  <line x1="196" y1="238" x2="316" y2="238" stroke="#e2645a" stroke-width="3"/>
-  <g transform="translate(294 258) scale(0.5)">
-    <path d="M-23 24h46l11 14a5 5 0 0 1-4 8h-60a5 5 0 0 1-4-8z" fill="#5fd38d"/>
-    <path d="M-10 -14h20v20l24 32a5 5 0 0 1-4 8h-60a5 5 0 0 1-4-8l24-32z" fill="none" stroke="#1d2742" stroke-width="7" stroke-linejoin="round"/>
-    <path d="M-17 -14h34" stroke="#1d2742" stroke-width="7" stroke-linecap="round"/>
-  </g>
-  <rect x="155.5" y="271" width="120" height="70" rx="8" fill="#0b5a4c"/>
-  <rect x="152" y="265" width="120" height="70" rx="8" fill="#ffffff"/>
-  <line x1="152" y1="282" x2="272" y2="282" stroke="#e2645a" stroke-width="3"/>
-  <g transform="translate(250 309) scale(0.72)">
-    <circle r="21" fill="#d6ecff"/>
-    <g fill="none" stroke="#1d2742" stroke-width="4" stroke-linecap="round">
-      <ellipse rx="9" ry="21"/>
-      <line x1="-21" x2="21"/>
-      <line x1="-18" y1="-10.5" x2="18" y2="-10.5"/>
-      <line x1="-18" y1="10.5" x2="18" y2="10.5"/>
-      <circle r="21" stroke-width="5"/>
-    </g>
-  </g>
-  <rect x="111.5" y="315" width="120" height="70" rx="8" fill="#1b3a99"/>
-  <rect x="108" y="309" width="120" height="70" rx="8" fill="#ffffff"/>
-  <line x1="108" y1="326" x2="228" y2="326" stroke="#e2645a" stroke-width="3"/>
-  <line x1="115" y1="347" x2="221" y2="347" stroke="#dbe5f4" stroke-width="2"/>
-  <line x1="115" y1="365" x2="221" y2="365" stroke="#dbe5f4" stroke-width="2"/>
-  <path d="M155 340 L181 366 M181 340 L155 366" stroke="#1d2742" stroke-width="11" stroke-linecap="round"/>
   </g>
 </svg>

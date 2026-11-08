@@ -1,17 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Single-colour layer for Android themed icons: the card, with the rule and × cut out. -->
+  <!-- Single-colour layer for Android themed icons: the deck, with the front
+       card cut free of the cards behind it and the M cut out. -->
   <defs>
+    <rect id="card" x="-160" y="-100" width="320" height="200" rx="18"/>
     <mask id="cut">
       <rect width="512" height="512" fill="#fff"/>
-      <g transform="translate(256 256) scale(0.85) translate(-256 -256) rotate(-6 256 256)">
-        <line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="10"/>
-        <path d="M226 238 L286 298 M286 238 L226 298" stroke="#000" stroke-width="22" stroke-linecap="round"/>
+      <g transform="translate(250 290) scale(0.9) translate(0 40) rotate(-6)">
+        <use href="#card" fill="none" stroke="#000" stroke-width="16"/>
+        <g fill="#000"><path transform="translate(-62.8 72) scale(0.085 -0.085)" d="M93.4 3.4Q93.4 74 94.1 184.3Q94.8 294.6 96.5 428.3Q98.2 562 101.3 705.6Q104.4 849.2 108.7 988Q113 1126.8 119.2 1245.5Q173.5 1251 246.7 1254.2Q319.9 1257.4 390.9 1259.2Q461.9 1261.1 510.9 1261.6Q560 1262 565 1262Q566.9 1258 578.1 1217.1Q589.4 1176.1 607 1111.1Q624.6 1046.1 645.1 968Q665.6 889.9 686.6 809.5Q707.6 729.1 726.2 657.1Q744.8 585 757.4 533.1Q770 481.1 773.8 460.9L733 455.6Q742.6 481.6 760.5 540.8Q778.4 599.9 801.3 678.5Q824.2 757.1 848.4 843.8Q872.6 930.4 895.1 1012.2Q917.5 1094 934.2 1158.4Q951 1222.9 957.8 1256.5Q1005 1256.5 1077.7 1254.6Q1150.4 1252.6 1225.1 1248.1Q1299.8 1243.5 1349.8 1234.6Q1369.8 1145.4 1378 1007.5Q1386.2 869.6 1386.2 714.4Q1386.2 586.1 1382.2 453.8Q1378.2 321.5 1371.8 205Q1365.4 88.5 1358.6 6.6Q1303.6 6.6 1239.4 8.9Q1175.2 11.1 1118.1 14.8Q1061 18.5 1027.9 20.4Q1032.1 73.9 1036.6 167.4Q1041.1 261 1044.6 362Q1047.2 424 1049.2 484.9Q1051.2 545.9 1053.2 595.7Q1055.2 645.5 1056.8 673.4Q1047.1 637.4 1029.2 581.4Q1011.4 525.4 989.3 458.7Q967.2 392 943.5 323.6Q919.8 255.2 897.8 193.6Q875.9 131.9 859.1 86.4Q842.4 41 833 21Q817.2 20 786.2 19.5Q755.1 19 738.9 19Q710 19 679.3 21.8Q648.6 24.5 610.4 28.2Q607.6 43.6 599 81.9Q590.4 120.2 577.8 175.7Q565.1 231.1 550.4 296.1Q535.6 361 520.2 428.4Q504.9 495.9 489.8 559.6Q474.6 623.2 461.8 676.1Q448.9 728.9 440 763.1Q440.8 669.5 441.6 568.1Q442.4 466.6 442.8 371Q443.1 275.4 443.5 196.9Q443.9 118.5 444.2 68Q444.6 17.5 444.6 8.4Q404.9 7.4 344.6 5.9Q284.4 4.5 218.3 3.9Q152.2 3.4 93.4 3.4Z"/></g>
       </g>
     </mask>
   </defs>
-  <g mask="url(#cut)">
-    <g transform="translate(256 256) scale(0.85) translate(-256 -256) rotate(-6 256 256)">
-      <rect x="106" y="166" width="300" height="180" rx="14" fill="#000"/>
+  <g mask="url(#cut)" fill="#000">
+    <g transform="translate(250 290) scale(0.9)">
+      <use href="#card" transform="translate(14 -107) rotate(16.4)"/>
+      <use href="#card" transform="translate(12 -86) rotate(13.2)"/>
+      <use href="#card" transform="translate(10 -65) rotate(10)"/>
+      <use href="#card" transform="translate(8 -44) rotate(6.8)"/>
+      <use href="#card" transform="translate(6 -23) rotate(3.6)"/>
+      <use href="#card" transform="translate(4 -2) rotate(0.4)"/>
+      <use href="#card" transform="translate(2 19) rotate(-2.8)"/>
+      <use href="#card" transform="translate(0 40) rotate(-6)"/>
     </g>
   </g>
 </svg>
