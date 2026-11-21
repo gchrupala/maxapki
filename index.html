@@ -1600,7 +1600,7 @@
         </div>
       </div>
       <p class="hint" id="progress-status" role="status"></p>
-      <button type="button" class="ghost-btn danger" id="reset" data-t="erase">Erase all progress</button>
+      <button type="button" class="ghost-btn danger" id="reset">Erase progress in this app</button>
     </section>
 
     <section id="backup-section">
@@ -8364,6 +8364,7 @@
   function syncSettings() {
     const t = T();
     const s = state.settings;
+    if (!$('reset').dataset.armed) $('reset').textContent = eraseText(false);
     $('lang').value = I18N.STRINGS[prefs.lang] ? prefs.lang : 'auto';
     $('lang-auto').textContent = t.deviceLanguage + ' (' + I18N.STRINGS[deviceLang()].name + ')';
     if (isTimes()) {
@@ -8601,26 +8602,57 @@
     render();
   });
 
+  // The text of the erase button, or of its second tap (confirm).
+  // JęzykiMax erases only the language being learned.
+  function eraseText(confirm) {
+    const t = T();
+    if (app.id !== 'languages') return confirm ? t.eraseConfirm : t.erase;
+    return (confirm ? t.eraseTargetConfirm : t.eraseTarget)(state.settings.target);
+  }
+
+  // Erases the progress of the open app and keeps its settings. JęzykiMax
+  // erases only the language being learned: its cards, its answers in the
+  // review log and its count of new cards today. The coins its cards earned
+  // are taken out of the purse, but no more than are left to spend; the
+  // rewards bought and the bonuses for finished days stay.
+  function eraseProgress() {
+    if (app.id !== 'languages') {
+      state = { ...defaultState(), settings: state.settings };
+      return;
+    }
+    const target = state.settings.target;
+    const mine = (id) => String(id).startsWith(target + '.');
+    let earned = 0;
+    for (const id of Object.keys(state.cards)) {
+      if (!mine(id)) continue;
+      for (let l = 1; l <= (state.cards[id].reward || 0); l++) earned += LEVEL_COINS[l];
+      delete state.cards[id];
+    }
+    state.coins = (state.coins || 0) - Math.min(earned, Math.max(0, balance()));
+    state.log = state.log.filter((entry) => !mine(entry[1]));
+    if (state.daily && state.daily.by) delete state.daily.by[target];
+  }
+
   let resetTimer = null;
   $('reset').addEventListener('click', (e) => {
     const btn = e.currentTarget;
     if (!btn.dataset.armed) {
       btn.dataset.armed = '1';
-      btn.textContent = T().eraseConfirm;
+      btn.textContent = eraseText(true);
       resetTimer = setTimeout(() => {
         delete btn.dataset.armed;
-        btn.textContent = T().erase;
+        btn.textContent = eraseText(false);
       }, 4000);
       return;
     }
     clearTimeout(resetTimer);
     delete btn.dataset.armed;
-    btn.textContent = T().erased;
-    state = { ...defaultState(), settings: state.settings };
+    eraseProgress();
     lastId = null;
     undos.length = 0;
     save();
     syncSettings();
+    btn.textContent = T().erased;
     next();
   });
 

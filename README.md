@@ -121,7 +121,8 @@ The settings panel (the gear button, "Ustawienia" in Polish) lets you:
 - switch the sound of the fireworks on or off (StoliceMax only; on by default);
 - move the app clock ahead by a day, to see how reviews come back;
 - save the progress of all the apps to a file, or load such a file (see [Moving progress](#moving-progress));
-- copy the review log as CSV.
+- copy the review log as CSV;
+- erase the progress of the open app ("Usuń postępy w tej aplikacji"). It takes two taps. The cards, review log, coins and rewards of that app are erased; its settings and the other apps stay as they are. In JęzykiMax the button erases only the language being learned ("Usuń postępy w nauce francuskiego"): its cards, its answers in the review log and its count of new cards today. The coins its cards earned are taken out of the purse, but no more than are left to spend. Rewards bought and bonuses for finished days stay, and so do the other languages.
 
 The explanations in the panel (what a setting does, how the cards are scheduled, how coins are earned, how to move progress) are folded. The "i" button next to a setting or a heading shows or hides them.
 
