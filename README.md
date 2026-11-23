@@ -119,6 +119,7 @@ The settings panel (the gear button, "Ustawienia" in Polish) lets you:
 - choose the size of the table (10 × 10 or 12 × 12), which tables to practise and which extra numbers to add (13 to 20, and 25);
 - change the number of new facts per day and the target recall;
 - switch the sound of the fireworks on or off (StoliceMax only; on by default);
+- switch silent mode on or off, for all the apps (off by default; see [Silent mode](#silent-mode));
 - move the app clock ahead by a day, to see how reviews come back;
 - save the progress of all the apps to a file, or load such a file (see [Moving progress](#moving-progress));
 - copy the review log as CSV;
@@ -129,6 +130,15 @@ The explanations in the panel (what a setting does, how the cards are scheduled,
 The log has one row per answer. Its first five columns (`card_id`, `review_time`, `review_rating`, `review_state`, `review_duration`) are the input format of the [FSRS optimizer](https://github.com/open-spaced-repetition/fsrs-optimizer), so the log can be used to fit FSRS parameters to one child once there are enough reviews. Two more columns give the fact and the typed answer.
 
 The progress square shows each fact: not started, practising (in the learning steps), learned, or mastered (interval of 21 days or more, which Anki calls "mature").
+
+### Silent mode
+
+The setting "Tryb cichy" (Silent mode), under the language in the settings panel, is for places where the app must stay quiet, such as a classroom. Like the language, it applies to all the apps at once. No app then makes a sound or listens through the microphone:
+
+- The fireworks of StoliceMax are silent.
+- JęzykiMax reads nothing aloud and shows no 🔊 or 🎤 button, as on a device without a voice or speech recognition. Its cards are answered by tapping or writing. Dictation and the cards answered only aloud (a picture to name, a short question) do not come, and definitions are written. A card of these kinds that is on the screen when silent mode is switched on gives way to another once the settings close.
+
+While silent mode is on, the settings it overrides ("Dźwięk fajerwerków", "Czytaj na głos automatycznie", "Słuchaj odpowiedzi", "Odpowiedzi mówione") are hidden. They keep their values, which apply again once silent mode is switched off.
 
 ## StoliceMax
 
@@ -179,7 +189,7 @@ Coins follow the same rules as in MnożenieMax (2, 5 and 10 per country, 10 per 
 | Pyramids of Giza | Cairo (Giza is part of greater Cairo) | 750 |
 | Forbidden City | Beijing | 800 |
 
-All 20 together cost 7700 coins. Learning all 194 capitals to the mastered level pays 3298 coins, and each finished day adds 10, so the full collection is a long-term goal. Each souvenir glitters: two layers of tiny coloured dots shimmer in turn, three stars twinkle on it, and a beam of light passes over it now and then. In the header the glitter stays still, so it does not distract from the cards. Buying a souvenir shows fireworks for 4 seconds: the screen darkens and rockets rise from the bottom and burst into sparks. A quiet sound goes with them: a whistle and a hiss as each rocket rises, and a bang with a crackle as it bursts, from the side of the screen where it is. The browser makes the sounds itself (Web Audio), so there are no sound files. The sound can be switched off in the settings ("Dźwięk fajerwerków"). Keychains in MnożenieMax keep their confetti. With reduced motion switched on in the device settings, the glitter stands still and only the souvenir is shown when one is bought.
+All 20 together cost 7700 coins. Learning all 194 capitals to the mastered level pays 3298 coins, and each finished day adds 10, so the full collection is a long-term goal. Each souvenir glitters: two layers of tiny coloured dots shimmer in turn, three stars twinkle on it, and a beam of light passes over it now and then. In the header the glitter stays still, so it does not distract from the cards. Buying a souvenir shows fireworks for 4 seconds: the screen darkens and rockets rise from the bottom and burst into sparks. A quiet sound goes with them: a whistle and a hiss as each rocket rises, and a bang with a crackle as it bursts, from the side of the screen where it is. The browser makes the sounds itself (Web Audio), so there are no sound files. The sound can be switched off in the settings ("Dźwięk fajerwerków"), or with [silent mode](#silent-mode) for all the apps. Keychains in MnożenieMax keep their confetti. With reduced motion switched on in the device settings, the glitter stands still and only the souvenir is shown when one is bought.
 
 The souvenirs and their prices are set in `SOUVENIRS` in `index.html`, their drawings, the places of their stars and the point where the chain holds them in `SOUVENIR_ART`, and their names in `i18n-capitals.js`.
 
